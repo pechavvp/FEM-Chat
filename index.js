@@ -4,6 +4,7 @@ const settingsBlock = document.querySelector(".settings-block-wrap");
 const settingsCloseBtn = document.querySelector(".setting-block-close");
 const messageSendBtn = document.querySelector(".message-send");
 const messageTemplate = document.querySelector("#message-tmpl");
+const historyStartTemplate = document.querySelector("#history-start-tmpl");
 const messageInput = document.querySelector(".message-input");
 const messageBlock = document.querySelector(".messages-block");
 const authorizationBlock = document.querySelector(".authorization-block-wrap");
@@ -33,7 +34,9 @@ let socket;
 let messageSocket;
 let scrollBottom;
 let loadHistory = true;
-let mouseDown;
+let isMouseDown;
+let history;
+let scroll = true;
 
 checkAuthorization();
 
@@ -45,51 +48,42 @@ function checkAuthorization() {
             socket = new WebSocket(`ws://chat1-341409.oa.r.appspot.com/websockets?${code}`);
             socket.onmessage = function(event) {
                 messageSocket = JSON.parse(event.data);
-                postMessage(messageSocket.user.name, messageSocket.text, messageSocket.createdAt, messageSocket.user.email);
+                postMessage(messageSocket.user.name, messageSocket.text, messageSocket.createdAt, messageSocket.user.email, "prepend");
             };
             closeAuthorization();
-            // getHistory();
         }
     })
 
 }
 
-getHistory();
+const promise = new Promise(resolve => {
+    resolve(getHistory());
+});
+promise.then(
+    result => {
+        postHistory();
+    }
+)
 
 function checkScroll(event) {
-    if (messageBlock.scrollTop == -(messageBlock.scrollHeight - messageBlock.clientHeight)) {
+    if (messageBlock.scrollTop == -(messageBlock.scrollHeight - messageBlock.clientHeight) && scroll == true) {
         messageBlock.removeEventListener('scroll', checkScroll);
-       
-        let y = messageBlock.scrollTop;
 
+        let scrollTop = messageBlock.scrollTop;
         const promise = new Promise(resolve => {
-            resolve(getHistory());
+            resolve(postHistory());
           });
 
         promise.then(
             result => {
-                messageBlock.scrollTop = y;
-                console.log(messageBlock.scrollTop);
+                messageBlock.scrollTop = scrollTop;
+                messageBlock.addEventListener('scroll', checkScroll);
             }
         );
-
-        setTimeout(() => {
-            messageBlock.addEventListener('scroll', checkScroll);
-        }, 1000);
     }
 }
 
 messageBlock.addEventListener('scroll', checkScroll);
-
-messageBlock.addEventListener('mousedown', function(e) {
-    mouseDown = true;
-    console.log(mouseDown);
-});
-
-messageBlock.addEventListener('mouseup', function() {
-    mouseDown = false;
-    console.log(mouseDown);
-});
 
 function sendMessage() {
     socket.send(JSON.stringify({
@@ -117,19 +111,6 @@ function closeConfirmation() {
     confirmationBlock.style.display = "none";
     chatBlock.style.display = "block";
 }
-
-// function sendMessage() {
-//     let cloneMessage = messageTemplate.content.cloneNode(true);
-//     let messageText = cloneMessage.querySelector(".message-item-text");
-//     messageText.innerHTML = `Я: ${messageInput.value}`;
-//     let messageTime = cloneMessage.querySelector(".message-item-time");
-//     let minutes = new Date().getMinutes();
-//     if (minutes < 10) {
-//         minutes = "0" + minutes;
-//     }
-//     messageTime.innerHTML = `${new Date().getHours()}:${minutes}`;
-//     messageBlock.prepend(cloneMessage);
-// }
 
 async function sendEmail() {
     const authorizationInfo = {
@@ -189,17 +170,27 @@ async function getHistory() {
             'Authorization': `Bearer ${code}`
           }
       });
-      let history = await response.json();
-      console.log(history);
-      let historyPart = history.messages.slice(-20);
-      console.log(historyPart);
-      historyPart.forEach(function(item) {
-        postMessage(item.user.name, item.text, item.createdAt, item.user.email);
-      })
-      return historyPart;
+      history = await response.json();
+      history = history.messages;
+      return history;
 }
 
-function postMessage(name, text, time, mail) {
+function postHistory() {
+    let historyPart = history.splice(-20);
+    historyPart = historyPart.reverse();
+    historyPart.forEach(function(item) {
+    postMessage(item.user.name, item.text, item.createdAt, item.user.email, "append");
+    })
+    if (history.length == 0) {
+        let cloneHistoryStart = historyStartTemplate.content.cloneNode(true);
+        messageBlock.append(cloneHistoryStart);
+        scroll = false;
+        return;
+    }
+    return historyPart;
+}
+
+function postMessage(name, text, time, mail, insertPlace) {
     cookieList = document.cookie.split(";");
     cookieList.forEach(function(item) {
         if (item.includes('myEmail=')) {
@@ -220,5 +211,5 @@ function postMessage(name, text, time, mail) {
 
     let messageTime = cloneMessage.querySelector(".message-item-time");
     messageTime.innerHTML = `${time[0]} ${(time[1]).slice(0, 8)}`;
-    messageBlock.prepend(cloneMessage);
+    messageBlock[insertPlace](cloneMessage);
 }
