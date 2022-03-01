@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-block">
+
+        <div class="chat-block">
+            <div class="buttons-block">
+                <button class="button button-settings">Настройки</button>
+                <button class="button button-exit">Выйти</button>
+            </div>
+            <div class="messages-block">
+                <template id="message-tmpl">
+                    <div class="message-item">
+                        <div class="message-item-wrap">
+                            <div class="message-item-text"></div>
+                            <span class="message-item-time"></span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <form class="form" onsubmit="return false">
+                <input class="message-input" type="text" placeholder="сообщение...">
+                <button class="message-send">-></button>
+            </form>
+        </div>
+
+        <div class="settings-block-wrap">
+            <div class="setting-block">
+                <div class="setting-block-title">
+                    <p class="setting-block-title-text">Настройки</p>
+                    <button class="setting-block-close">+</button>
+                </div>
+                <p class="setting-block-text">Имя в чате</p>
+                <form class="settings-block-form" onsubmit="return false">
+                    <input class="settings-block-input" type="text" placeholder="введите имя">
+                    <button class="settings-block-send">-></button>
+                </form>
+            </div>
+        </div>
+
+        <div class="authorization-block-wrap">
+            <div class="authorization-block">
+                <div class="authorization-block-title">
+                    <p class="authorization-block-title-text">Авторизация</p>
+                    <button class="authorization-block-close">+</button>
+                </div>
+                <p class="authorization-block-text">Почта</p>
+                <form class="authorization-block-form" onsubmit="return false">
+                    <input class="authorization-block-input" type="text" placeholder="введите почту">
+                    <button class="authorization-block-send">Получить код</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="confirmation-block-wrap">
+            <div class="confirmation-block">
+                <div class="confirmation-block-title">
+                    <p class="confirmation-block-title-text">Подтверждение</p>
+                    <button class="confirmation-block-close">+</button>
+                </div>
+                <p class="confirmation-block-text">Код</p>
+                <form class="confirmation-block-form" onsubmit="return false">
+                    <input class="confirmation-block-input" type="text" placeholder="введите код">
+                    <button class="confirmation-block-send">Войти</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>
