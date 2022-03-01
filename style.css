@@ -333,3 +333,13 @@ body {
     cursor: pointer;
     margin-top: 7px;
 }
+
+.history-start {
+    text-align: center;
+    font-style: italic;
+    padding: 3px;
+}
+
+.history-start-message {
+    font-size: 12px;
+}
